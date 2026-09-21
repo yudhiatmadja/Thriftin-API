@@ -1,0 +1,430 @@
+basePath: /api/v1
+definitions:
+  internal_handler.LoginReq:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  internal_handler.ProductReq:
+    properties:
+      brand_id:
+        type: string
+      category_id:
+        type: string
+      condition:
+        type: string
+      description:
+        type: string
+      price:
+        type: integer
+      title:
+        type: string
+    required:
+    - price
+    - title
+    type: object
+  internal_handler.RefreshReq:
+    properties:
+      refresh_token:
+        type: string
+    required:
+    - refresh_token
+    type: object
+  internal_handler.RegisterReq:
+    properties:
+      email:
+        type: string
+      full_name:
+        type: string
+      password:
+        minLength: 6
+        type: string
+      username:
+        type: string
+    required:
+    - email
+    - password
+    - username
+    type: object
+info:
+  contact: {}
+  description: Thriftin second-hand marketplace API
+  title: Thriftin API
+  version: "1.0"
+paths:
+  /admin/stats:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: Admin stats
+      tags:
+      - admin
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: login
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handler.LoginReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Login
+      tags:
+      - auth
+  /auth/me:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: Me
+      tags:
+      - auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: refresh
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handler.RefreshReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Refresh token
+      tags:
+      - auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: register
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handler.RegisterReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Register
+      tags:
+      - auth
+  /cart:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: List cart
+      tags:
+      - cart
+  /cart/items:
+    post:
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: Add to cart
+      tags:
+      - cart
+  /categories:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List categories
+      tags:
+      - categories
+    post:
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: Create category
+      tags:
+      - categories
+  /chat/messages:
+    post:
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: Send message
+      tags:
+      - chat
+  /chat/rooms:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: List chat rooms
+      tags:
+      - chat
+  /chat/rooms/{id}/messages:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: List messages
+      tags:
+      - chat
+  /follow:
+    post:
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: Follow user
+      tags:
+      - follow
+  /follow/{id}:
+    delete:
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: Unfollow
+      tags:
+      - follow
+  /notifications:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: List notifications
+      tags:
+      - notifications
+  /orders/checkout:
+    post:
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: Checkout
+      tags:
+      - orders
+  /products:
+    get:
+      parameters:
+      - description: search
+        in: query
+        name: q
+        type: string
+      - description: limit
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List products
+      tags:
+      - products
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: product
+        in: body
+        name: body
+        required: true
+        schema:
+          $ref: '#/definitions/internal_handler.ProductReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: Create product
+      tags:
+      - products
+  /products/{id}:
+    get:
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get product
+      tags:
+      - products
+  /products/{id}/reserve:
+    post:
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: Reserve product
+      tags:
+      - products
+  /reviews:
+    post:
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: Create review
+      tags:
+      - reviews
+  /reviews/{productId}:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      summary: List reviews
+      tags:
+      - reviews
+  /wishlist:
+    get:
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: List wishlist
+      tags:
+      - wishlist
+  /wishlist/{id}:
+    post:
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - Bearer: []
+      summary: Toggle wishlist
+      tags:
+      - wishlist
+securityDefinitions:
+  Bearer:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

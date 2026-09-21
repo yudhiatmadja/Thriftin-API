@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: thriftin
+      POSTGRES_PASSWORD: thriftin
+      POSTGRES_DB: thriftin
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+  api:
+    build: .
+    ports: ["8081:8080"]
+    env_file: .env
+    environment:
+      DB_URL: postgres://thriftin:thriftin@postgres:5432/thriftin?sslmode=disable
+      REDIS_URL: redis://redis:6379/0
+    depends_on: [postgres, redis]
+volumes:
+  pgdata:
