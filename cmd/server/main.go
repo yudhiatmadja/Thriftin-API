@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -47,12 +48,16 @@ func main() {
 		Order: handler.NewOrder(svcs.Order), Wishlist: handler.NewWishlist(svcs.Wishlist),
 		Review: handler.NewReview(svcs.Review), Follow: handler.NewFollow(svcs.Follow),
 		Chat: handler.NewChat(svcs.Chat), Notification: handler.NewNotification(svcs.Notification),
-		Admin: handler.NewAdmin(),
+		Report: handler.NewReport(svcs.Report),
+		Admin: handler.NewAdmin(repos.Admin),
+		Seller: handler.NewSeller(svcs.Seller, svcs.Banned),
 	}
 	gin.SetMode(gin.ReleaseMode)
 	if cfg.Env == "development" { gin.SetMode(gin.DebugMode) }
 	r := gin.New()
 	r.Use(gin.Recovery())
+	_ = os.MkdirAll("uploads", 0755)
+	r.Static("/uploads", "./uploads")
 	router.Setup(r, h, cfg.JWTSecret)
 	r.GET("/health", func(c *gin.Context){ c.JSON(200, gin.H{"status":"ok"}) })
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
@@ -63,11 +68,32 @@ func main() {
 }
 
 func runMigrations(ctx context.Context, pool *pgxpool.Pool) error {
+	if _, err := pool.Exec(ctx, `CREATE TABLE IF NOT EXISTS schema_migrations(version TEXT PRIMARY KEY, applied_at TIMESTAMPTZ DEFAULT now())`); err != nil {
+		return err
+	}
 	matches, _ := filepath.Glob("migrations/*.up.sql")
 	for _, m := range matches {
+		ver := filepath.Base(m)
+		var exists bool
+		_ = pool.QueryRow(ctx, `SELECT EXISTS(SELECT 1 FROM schema_migrations WHERE version=$1)`, ver).Scan(&exists)
+		if exists {
+			continue
+		}
 		b, err := os.ReadFile(m)
-		if err != nil { continue }
-		if _, err := pool.Exec(ctx, string(b)); err != nil { return err }
+		if err != nil {
+			continue
+		}
+		if _, err := pool.Exec(ctx, string(b)); err != nil {
+			// DB lama yang sudah di-migrate manual: anggap 000001 applied
+			if strings.Contains(err.Error(), "already exists") {
+				log.Printf("migrate %s: already applied, marking done", ver)
+				_, _ = pool.Exec(ctx, `INSERT INTO schema_migrations(version) VALUES($1) ON CONFLICT DO NOTHING`, ver)
+				continue
+			}
+			return err
+		}
+		_, _ = pool.Exec(ctx, `INSERT INTO schema_migrations(version) VALUES($1) ON CONFLICT DO NOTHING`, ver)
+		log.Printf("migrate %s: applied", ver)
 	}
 	return nil
 }

@@ -7,7 +7,7 @@ import (
 	jwtpkg "github.com/thriftin/api/pkg/jwt"
 	"github.com/thriftin/api/pkg/response"
 )
-
+ 
 func Auth(secret string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		h := c.GetHeader("Authorization")

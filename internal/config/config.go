@@ -12,9 +12,10 @@ type Config struct {
 	Env           string
 	DBURL         string
 	RedisURL      string
-	JWTSecret     string
-	JWTExpiry     time.Duration
-	RefreshExpiry time.Duration
+	JWTSecret      string
+	JWTExpiry      time.Duration
+	RefreshExpiry  time.Duration
+	GoogleClientID string
 }
 
 func Load() *Config {
@@ -27,6 +28,7 @@ func Load() *Config {
 		JWTSecret:     env("JWT_SECRET", "change-me"),
 		JWTExpiry:     mustDuration(env("JWT_EXPIRY", "15m")),
 		RefreshExpiry: mustDuration(env("REFRESH_EXPIRY", "168h")),
+		GoogleClientID: env("GOOGLE_CLIENT_ID", ""),
 	}
 	return c
 }

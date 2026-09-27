@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS reports, refresh_tokens, notifications, chat_messages, chat_rooms, follows, reviews, wishlists, order_items, orders, cart_items, carts, product_images, products, brands, categories, users CASCADE;
